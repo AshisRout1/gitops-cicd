@@ -7,7 +7,7 @@ def create_app():
     
     @app.get("/")
     def index():
-        message = os.getenv("MESSAGE", "Hello from Flask on Kubernetes! 🚀")
+        message = os.getenv("MESSAGE", "Hello from ArgoCD with Github Actions on Kubernetes! 🚀")
         # Return HTML with green message
         return f"""
         <html>

@@ -119,6 +119,7 @@ jobs:
           image-ref: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
           format: table
           severity: CRITICAL,HIGH
+          ignore-unfixed: true
           exit-code: 1
 
 

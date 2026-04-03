@@ -49,7 +49,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           image-ref: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
           format: table

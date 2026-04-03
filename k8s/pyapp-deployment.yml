@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: pyapp
-          image: ashis1099/gha-pyapp:b3e28ef80bde3ea8097bef5082b676f62fbe190a
+          image: ashis1099/gha-pyapp:5ca510c92cc00d4957f820322211470f8fafe4d0
           ports:
             - containerPort: 8000

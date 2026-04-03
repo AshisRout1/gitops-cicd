@@ -47,7 +47,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         with:
           args: detect --source . --verbose
-        continue-on-error: true
+        continue-on-error: false
 
 
   # 🔍 3. TRIVY FILESYSTEM SCAN
@@ -66,7 +66,7 @@ jobs:
           scan-ref: .
           format: table
           severity: CRITICAL,HIGH
-          exit-code: 0
+          exit-code: 1
 
 
   # 🐳 4. BUILD & PUSH DOCKER IMAGE
@@ -119,7 +119,7 @@ jobs:
           image-ref: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
           format: table
           severity: CRITICAL,HIGH
-          exit-code: 0
+          exit-code: 1
 
 
   # 🛠️ 6. UPDATE K8s MANIFEST

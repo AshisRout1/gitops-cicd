@@ -1,4 +1,4 @@
-name: Kubernetes CI 
+name: Kubernetes CI DevSecOps
 
 on:
   push:
@@ -8,29 +8,62 @@ on:
 permissions:
   contents: write
 
-env:
-  SHORT_SHA: ${{ github.sha }}
-
 jobs:
 
-  docker-build-push:
+  # 🔍 1. GITLEAKS SCAN (Secrets scanning)
+  gitleaks-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Run Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source . --verbose
+        continue-on-error: true   # don't break pipeline
+
+
+  # 🔍 2. TRIVY FILESYSTEM SCAN
+  trivy-fs-scan:
+    runs-on: ubuntu-latest
+    needs: gitleaks-scan
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 0
+
+
+  # 🐳 3. BUILD & PUSH DOCKER IMAGE
+  docker-build-push:
+    runs-on: ubuntu-latest
+    needs: trivy-fs-scan
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Set SHORT SHA
-        run: echo "SHORT_SHA=$(echo $SHORT_SHA | cut -c1-7)" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Debug Tag
+        run: echo "TAG = $SHORT_SHA"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Debug Tag
-        run: echo "TAG = $SHORT_SHA"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
@@ -40,7 +73,8 @@ jobs:
           tags: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
 
 
-  trivy-scan:
+  # 🔐 4. TRIVY IMAGE SCAN
+  trivy-image-scan:
     runs-on: ubuntu-latest
     needs: docker-build-push
 
@@ -54,13 +88,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Debug Pull
-        run: |
-          echo "Trying to pull image..."
-          docker pull ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
+      - name: Verify Image Exists
+        run: docker pull ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
 
-      - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@v0.20.0
+      - name: Run Trivy Image Scan
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
           format: table
@@ -68,9 +100,10 @@ jobs:
           exit-code: 0
 
 
+  # 🛠️ 5. UPDATE K8s MANIFEST
   update-manifest:
     runs-on: ubuntu-latest
-    needs: trivy-scan
+    needs: trivy-image-scan
 
     steps:
       - name: Checkout Code
@@ -91,5 +124,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions@noreply.github.com"
           git add k8s/pyapp-deployment.yml
-          git commit -m "Updated image tag to $SHORT_SHA" || echo "No changes"
+          git commit -m "Updated image tag to ${{ env.SHORT_SHA }}" || echo "No changes"
           git push origin main

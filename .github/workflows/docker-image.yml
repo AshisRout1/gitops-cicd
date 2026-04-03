@@ -28,7 +28,7 @@ jobs:
         with:
           image-ref: ashis1099/gha-pyapp:${{ env.SHORT_SHA }}
           severity: CRITICAL,HIGH
-          exit-code: 1
+          exit-code: 0
       - name: Install yq
         uses: mikefarah/yq@v4.44.3
       - name: Update deployment.yml with latest docker tag

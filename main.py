@@ -10,7 +10,7 @@ def create_app():
         # Safe environment variable usage (no secrets hardcoded)
         message = os.getenv(
             "MESSAGE",
-            "Hello from Argocd running on Kubernetes 🚀"
+            "Hello from Argocd running on Kubernetes  🚀"
         )
 
         return f"""

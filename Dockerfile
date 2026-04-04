@@ -9,20 +9,17 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-
-# 2. Final stage (DISTROLESS)
+# 2. Final stage
 FROM gcr.io/distroless/python3-debian12
 
 WORKDIR /app
 
-# Copy dependencies and app
 COPY --from=builder /install /usr/local
 COPY --from=builder /app /app
 
-# Non-root user
 USER nonroot:nonroot
 
 EXPOSE 8000
 
-# ✅ IMPORTANT FIX HERE
+# ✅ FIX
 CMD ["python3", "main.py"]

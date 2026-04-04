@@ -7,17 +7,16 @@ def create_app():
 
     @app.get("/")
     def index():
-        # Safe environment variable usage (no secrets hardcoded)
         message = os.getenv(
             "MESSAGE",
-            "Hello from Argocd running on Kubernetes  🚀"
+            "Hello from Argocd running on Kubernetes 🚀"
         )
 
         return f"""
         <html>
             <head><title>Secure Python App</title></head>
-            <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
-                <h1 style="color: black;">{message}</h1>
+            <body style="font-family: Arial; text-align:center; margin-top:50px;">
+                <h1>{message}</h1>
             </body>
         </html>
         """
@@ -29,9 +28,5 @@ def create_app():
     return app
 
 
+# 👇 IMPORTANT: expose app for Gunicorn
 app = create_app()
-
-if __name__ == "__main__":
-    # No debug mode (important for security scan)
-    port = int(os.getenv("PORT", "8000"))
-    app.run(host="0.0.0.0", port=port)

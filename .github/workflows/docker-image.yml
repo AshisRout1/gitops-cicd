@@ -1,4 +1,4 @@
-name: Kubernetes CI DevOps
+name: Kubernetes CICD DevOps
 
 on:
   push:
@@ -150,4 +150,40 @@ jobs:
           git config user.email "github-actions@noreply.github.com"
           git add k8s/pyapp-deployment.yml
           git commit -m "Updated image tag to ${{ env.SHORT_SHA }}" || echo "No changes"
-          git push origin main
+          git push origin main   
+          
+     Deploy to Kubernetes:
+      runs-on: runner-1
+      needs: update-manifest
+
+      steps:
+       - name: Checkout Code
+         uses: actions/checkout@v4
+
+       - name: Install AWS CLI
+         run: >
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+       - name: Configure AWS credentials
+         uses: aws-actions/configure-aws-credentials@v2
+         with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+       - name: Set up kubectl
+         uses: azure/setup-kubectl@v3
+         with:
+          version: latest
+
+       - name: Configure kubeconfig
+         run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.EKS_KUBECONFIG }}" > $HOME/.kube/config
+
+       - name: Deploy to EKS
+         run: |
+          kubectl apply -f pyapp-deployment.yaml
+          kubectl apply -f pyapp-svc.yaml

@@ -12,7 +12,7 @@ jobs:
 
   # 🧪 1. COMPILE / BUILD CHECK
   compile:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
 
     steps:
       - name: Checkout Code
@@ -36,7 +36,7 @@ jobs:
 
   # 🔍 2. GITLEAKS SCAN
   gitleaks-scan:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
     needs: compile
 
     steps:
@@ -52,7 +52,7 @@ jobs:
 
   # 🔍 3. TRIVY FILESYSTEM SCAN
   trivy-fs-scan:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
     needs: gitleaks-scan
 
     steps:
@@ -71,7 +71,7 @@ jobs:
 
   # 🐳 4. BUILD & PUSH DOCKER IMAGE
   docker-build-push:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
     needs: trivy-fs-scan
 
     steps:
@@ -97,7 +97,7 @@ jobs:
 
   # 🔐 5. TRIVY IMAGE SCAN
   trivy-image-scan:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
     needs: docker-build-push
 
     steps:

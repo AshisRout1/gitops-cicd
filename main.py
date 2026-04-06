@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return os.getenv("MESSAGE", "Hello from ArgoCD Kubernetes 🚀")
+    return os.getenv("MESSAGE", "Hello from Github Action CICD Completed successfully 🚀")
 
 @app.route("/health")
 def health():

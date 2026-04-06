@@ -127,7 +127,7 @@ jobs:
 
   # 🛠️ 6. UPDATE K8s MANIFEST
   update-manifest:
-    runs-on: ubuntu-latest
+    runs-on: runner-1
     needs: trivy-image-scan
 
     steps:
@@ -152,7 +152,7 @@ jobs:
           git commit -m "Updated image tag to ${{ env.SHORT_SHA }}" || echo "No changes"
           git push origin main   
           
-     Deploy to Kubernetes:
+    Deploy to Kubernetes:
       runs-on: runner-1
       needs: update-manifest
 

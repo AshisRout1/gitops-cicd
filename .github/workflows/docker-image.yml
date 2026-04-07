@@ -129,7 +129,7 @@ jobs:
 
       - name: Update Kubernetes Manifest
         run: |
-          yq -i '.spec.template.spec.containers[0].image = "ashis1099/gha-pyapp:${{ env.SHORT_SHA }}"' ./k8s/pyapp-deployment.yaml
+          yq -i '.spec.template.spec.containers[0].image = "ashis1099/gha-pyapp:${{ env.SHORT_SHA }}"' ./k8s/pyapp-deployment.yml
 
       - name: Commit and Push Changes
         run: |
